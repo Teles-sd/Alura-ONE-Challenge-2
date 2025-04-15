@@ -1,0 +1,9 @@
+
+# Git Ignore patterns
+
+# Files
+
+.commit-msg-drafts.md
+
+# Directories
+
