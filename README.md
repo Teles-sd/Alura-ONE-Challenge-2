@@ -25,9 +25,9 @@ Para isso, você analisará dados de vendas, desempenho e avaliações das 4 loj
     - [x] média de avaliações dos clientes,
     - [x] produtos mais e menos vendidos,
     - [x] custo médio do frete.
-- [ ] Criar gráficos para visualização:
-    - [ ] Decidir quais tipos de gráficos usar para apresentar os resultados de maneira clara e visual.
-    - [ ] **Mínimo de 3 gráficos diferentes**, que podem incluir gráficos de barras, pizza, dispersão, entre outros.
+- [x] Criar gráficos para visualização:
+    - [x] Decidir quais tipos de gráficos usar para apresentar os resultados de maneira clara e visual.
+    - [x] **Mínimo de 3 gráficos diferentes**, que podem incluir gráficos de barras, pizza, dispersão, entre outros.
 - [ ] Apresentar uma recomendação: Após as análises, escreva um texto explicando qual loja o Senhor João **deve vender** e por quê, com base nos dados apresentados.
 
 ---
@@ -53,8 +53,9 @@ Análise de dados e visualização em Python: [Notebook](./AluraStoreBr.ipynb).
 
 - Análise de dados e visualização:
   - [Python][python], versão: `3.11.12` (colab)
+    - Numpy
     - Pandas
-    <!-- - Matplotlib -->
+    - Matplotlib
 - Ambiente:
   - [Google Colaboratory][colab]
 
