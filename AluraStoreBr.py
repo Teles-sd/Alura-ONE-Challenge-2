@@ -9,7 +9,7 @@
 # 
 # 
 
-# In[ ]:
+# In[1]:
 
 
 import numpy as np
@@ -17,7 +17,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 
-# In[ ]:
+# In[2]:
 
 
 url1 = "https://raw.githubusercontent.com/alura-es-cursos/challenge1-data-science/refs/heads/main/base-de-dados-challenge-1/loja_1.csv"
@@ -34,19 +34,19 @@ lojas = [loja1, loja2, loja3, loja4]
 lojas_str = [ f"Loja {n}" for n in range(1, 5) ]
 
 
-# In[ ]:
+# In[3]:
 
 
 loja1
 
 
-# In[ ]:
+# In[4]:
 
 
 print([len(loja) for loja in lojas])
 
 
-# In[ ]:
+# In[5]:
 
 
 print(loja1.info())
@@ -55,25 +55,34 @@ print(loja1.info())
 # ### 1\. Análise do faturamento
 # 
 
-# In[ ]:
+# In[6]:
 
 
 faturamentos = [ loja['Preço'].sum() for loja in lojas ]
+faturamento_total = sum(faturamentos)
 
 print( "Faturamentos:\n{}".format( ("\n".join( ( f'Loja {n}: R$ {val:_.2f}' for n,val in enumerate(faturamentos,start=1) ) )).replace(".",",").replace("_",".") ) )
+
+print(f"\nTotal : R$ {faturamento_total:_.2f}".replace(".",",").replace("_","."))
+
+
+# In[7]:
+
+
+print( "Porcentagem do faturamentos:\n{}".format( ("\n".join( ( f'{loja_s}: {val/faturamento_total :.1%}' for loja_s,val in zip(lojas_str,faturamentos) ) )) ) )
 
 
 # ### 2\. Vendas por Categoria
 # 
 
-# In[ ]:
+# In[8]:
 
 
 # loja1[ ['Categoria do Produto','Preço'] ].groupby("Categoria do Produto").describe()
 # loja1[ ['Categoria do Produto','Preço'] ].groupby("Categoria do Produto").count()
 
 
-# In[ ]:
+# In[9]:
 
 
 vendas_pCategoria = pd.concat([ loja[ ['Categoria do Produto','Produto'] ].groupby("Categoria do Produto").count().rename(columns={'Produto':f"Loja {n}"}) for n,loja in enumerate(lojas,start=1) ], axis=1)
@@ -84,7 +93,7 @@ vendas_pCategoria
 
 # ### 3\. Média de Avaliação das Lojas
 
-# In[ ]:
+# In[10]:
 
 
 avaliacao_media = pd.DataFrame(
@@ -100,7 +109,7 @@ avaliacao_media
 
 # ### 4\. Produtos Mais e Menos Vendidos
 
-# In[ ]:
+# In[11]:
 
 
 produtos_nVendas = pd.concat([ loja[['Produto','Preço']].groupby("Produto").count().rename(columns={'Preço':f"Loja {n}"}) for n,loja in enumerate(lojas,start=1) ], axis=1)
@@ -108,7 +117,7 @@ produtos_nVendas["Total"] = produtos_nVendas.sum(axis=1)
 produtos_nVendas.head(20).tail(10)
 
 
-# In[ ]:
+# In[12]:
 
 
 produto_maiorNumVendas = {loja:produtos_nVendas[loja].max() for loja in produtos_nVendas}
@@ -118,7 +127,7 @@ print("Produto(s) mais vendidos, por loja:")
 print("\n".join(f"{loja :6s}: vendas={produto_maiorNumVendas[loja] :3d}  produto(s)={produtos_maisVendidos[loja]}" for loja in produtos_maisVendidos.keys()))
 
 
-# In[ ]:
+# In[13]:
 
 
 produto_menorNumVendas = {loja:produtos_nVendas[loja].min() for loja in produtos_nVendas}
@@ -131,7 +140,7 @@ print("\n".join(f"{loja :6s}: vendas={produto_menorNumVendas[loja] :3d}  produto
 # ### 5\. Frete Médio por Loja
 # 
 
-# In[ ]:
+# In[14]:
 
 
 frete_medio = pd.DataFrame(
@@ -148,7 +157,7 @@ print( "Frete:\n{}".format( "\n".join( f"{loja}   Média: R$ {frete_medio['media
 
 # #### Faturamento por categoria
 
-# In[ ]:
+# In[15]:
 
 
 faturamento_pCategoria = pd.concat([ loja[['Categoria do Produto','Preço']].groupby("Categoria do Produto").sum().rename(columns={'Preço':loja_s}) for loja,loja_s in zip(lojas, lojas_str) ], axis=1)
@@ -158,26 +167,26 @@ faturamento_pCategoria.sort_values(by=['Total'], inplace=True, ascending=False)
 faturamento_pCategoria
 
 
-# In[ ]:
+# In[16]:
 
 
 faturamentoPctg_pCategoria = faturamento_pCategoria[lojas_str].copy()
-for loja in lojas_str:
-    faturamentoPctg_pCategoria[loja] /= faturamento_pCategoria['Total']
+for loja_s in lojas_str:
+    faturamentoPctg_pCategoria[loja_s] /= faturamento_pCategoria['Total']
 faturamentoPctg_pCategoria = faturamentoPctg_pCategoria.apply(lambda x: round(x, ndigits=4), )
 faturamentoPctg_pCategoria
 
 
 # #### Avaliação por loja
 
-# In[ ]:
+# In[17]:
 
 
 avaliacao_pLoja = pd.concat( ( loja[['Produto','Avaliação da compra']].groupby("Avaliação da compra").count().rename(columns={'Produto':loja_s}) for loja,loja_s in zip(lojas,lojas_str) ), axis=1 )
 avaliacao_pLoja
 
 
-# In[ ]:
+# In[18]:
 
 
 avaliacao_pLoja_all = pd.concat( ( loja['Avaliação da compra'].rename(loja_s) for loja,loja_s in zip(lojas,lojas_str) ), axis=1 )
@@ -185,53 +194,62 @@ avaliacao_pLoja_all = pd.concat( ( loja['Avaliação da compra'].rename(loja_s) 
 avaliacao_pLoja_all
 
 
-# #### Rendimento por produto em cada loja
+# #### Preço por produto
 
-# In[ ]:
+# In[19]:
 
 
 produtos = pd.concat([ loja['Produto'] for loja in lojas]).unique()
 # Counter(produtos)
-# produtos
+len(produtos)
+# np.sort(produtos)
 
 
-# In[ ]:
+# In[20]:
 
 
 import random
 
 
-# In[ ]:
+# In[21]:
 
 
 # prod = random.choice(produtos)
 # prod
 
 
-# In[ ]:
+# In[22]:
 
 
 prod = random.choice(produtos)
+# prod = "TV Led UHD 4K"
 
 for loja in lojas:
     print(loja[loja['Produto'] == prod][['Produto','Preço']].head(3))
 
 
-# In[ ]:
+# In[23]:
 
 
-renda_pProduto = pd.concat([ loja[['Produto','Preço']].groupby("Produto").sum().rename(columns={'Preço':loja_s}) for loja,loja_s in zip(lojas, lojas_str) ], axis=1)
-renda_pProduto['Total'] = renda_pProduto.sum(axis=1)
-# renda_pProduto.sort_values(by=['Total'], inplace=True)
-renda_pProduto.sort_values(by=['Total'], inplace=True, ascending=False)
-renda_pProduto.head()
+preco_pProduto = pd.concat([ loja[['Produto','Preço']] for loja in lojas ], axis=0).groupby("Produto").describe()["Preço"][["mean", "std"]]
+preco_pProduto.head(20).tail(10)
 
 
-# In[ ]:
+# In[24]:
 
 
-for loja in renda_pProduto.columns:
-    print(loja, renda_pProduto.sort_values(by=loja, ascending=False).index[0:3])
+preco_pProduto_pLoja = pd.concat([ loja[['Produto','Preço']].groupby("Produto").sum().rename(columns={'Preço':loja_s}) for loja,loja_s in zip(lojas, lojas_str) ], axis=1)
+preco_pProduto_pLoja['Total'] = preco_pProduto_pLoja.sum(axis=1)
+# preco_pProduto_pLoja.sort_values(by=['Total'], inplace=True)
+preco_pProduto_pLoja.sort_values(by=['Total'], inplace=True, ascending=False)
+preco_pProduto_pLoja.head()
+
+
+# In[25]:
+
+
+for loja in preco_pProduto_pLoja.columns:
+    print(loja, preco_pProduto_pLoja.sort_values(by=loja, ascending=False).index[0:3])
 
 
 # ## Visualização
@@ -240,7 +258,7 @@ for loja in renda_pProduto.columns:
 # 
 # Porcentagem do Faturamento por Categoria
 
-# In[ ]:
+# In[26]:
 
 
 fig1, ax1 = plt.subplots(1, 3, figsize=(15,7))
@@ -288,25 +306,16 @@ for i,ax in enumerate([ ax1[2], ax1_0up, ax1_0dn ]):
     ax.set_xlim(-2.5*barWidth, 2.5*barWidth)
 
 fig1.show()
+# fig1.savefig('Gráfico-1.png')
 
 
-# https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def
-# 
-# > "CN" color spec where 'C' precedes a number acting as an index into the default property cycle.
-# >
-# > Example:
-# > - `'C0'`
-# > - `'C1'`
-# >
-# > > [!NOTE]
-# > >
-# > > Matplotlib indexes color at draw time and defaults to black if cycle does not include color.
+# [Relatório](#scrollTo=Relat_rio)
 
 # ### Gráfico 2
 # 
 # Quantidade de vendas por Categoria
 
-# In[ ]:
+# In[27]:
 
 
 fig2, ax2 = plt.subplots(1,1, figsize=(13,7))
@@ -333,13 +342,16 @@ ax2.grid()
 ax2.set_axisbelow(True)
 
 fig2.show()
+# fig1.savefig('Gráfico-2.png')
 
+
+# [Relatório](#scrollTo=Relat_rio)
 
 # ### Gráfico 3
 # 
 # Avaliações por Loja
 
-# In[ ]:
+# In[28]:
 
 
 # fig3, (ax3_1,ax3_2,ax3s) = plt.subplots(1,3, figsize=(18,7))
@@ -353,13 +365,13 @@ fig3.suptitle("Avaliações por Loja")
 
 aval_colors = plt.colormaps['RdYlGn'](np.linspace(0.15, 0.85, 5))
 
-for loja in lojas_str:
+for loja_s in lojas_str:
 
     barContnr = ax3.barh(
-        loja, avaliacao_pLoja[loja],
-        left=avaliacao_pLoja[loja].cumsum() - avaliacao_pLoja[loja],
+        loja_s, avaliacao_pLoja[loja_s],
+        left=avaliacao_pLoja[loja_s].cumsum() - avaliacao_pLoja[loja_s],
         height=0.5,
-        label="1 - muito ruim,2 - ruim,3 - regular,4 - bom,5 - muito bom".split(",") if loja == "Loja 1" else None,
+        label="1 - muito ruim,2 - ruim,3 - regular,4 - bom,5 - muito bom".split(",") if loja_s == "Loja 1" else None,
         color=aval_colors,
     )
 
@@ -386,8 +398,94 @@ ax3.legend(
 # ax3s.set_ylim(0.9, 5.1)
 
 fig3.show()
+# fig1.savefig('Gráfico-3.png')
+
+
+# [Relatório](#scrollTo=Relat_rio)
+
+# ### Gráfico 4
+# 
+# Preço médio e Produtos mais vendidos
+
+# In[29]:
+
+
+fig4 = plt.figure(figsize=(15,8))
+
+# fig4.suptitle("Preço médio por Produto\n(em ordem crescente de número de vendas totais)")
+
+ax41 = fig4.add_subplot(4,4, (1,11))
+
+ax42 = fig4.add_subplot(444)
+ax43 = fig4.add_subplot(448)
+ax44 = fig4.add_subplot(4,4, 12)
+ax45 = fig4.add_subplot(4,4, 16)
+
+preco_sorted = preco_pProduto.loc[produtos_nVendas['Total'].sort_values().index]
+
+ax41.errorbar(
+    preco_sorted.index, preco_sorted["mean"], yerr=preco_sorted["std"],
+    ecolor="C1",
+    lw=3,
+    elinewidth=2,
+    capthick=2,
+    capsize=4,
+    barsabove=False,
+)
+
+ax41.set_title("Preço médio por Produto\n(em ordem crescente de número de vendas totais)")
+ax41.grid()
+
+ax41.set_xlim(-1, len(preco_sorted.index))
+ax41.tick_params(axis="x", labelrotation=90)
+
+# ax41.set_ylabel("Preço (R$)")
+# ax41.set_yticklabels( [ f"R$ {t:.2f}" if t>0 else "" for t in ax41.get_yticks()] )
+ax41.set_yticks(ax41.get_yticks()[1:-1], labels=[ f"R$ {t:.2f}" if t>0 else "" for t in ax41.get_yticks()[1:-1]] )
+
+for c, (ax,loja_s) in enumerate(zip([ax42,ax43,ax44,ax45],lojas_str), start=2):
+
+    produtos_sorted = produtos_nVendas[loja_s].sort_values().iloc[np.r_[0:3, -4:0]]
+
+    barContnr = ax.barh(produtos_sorted.index, produtos_sorted.values, color=f"C{c}", label=loja_s, height=0.9)
+
+    # ax.bar_label(barContnr, label_type="center", labels=[l + f" ({n})" for l,n in produtos_sorted.items()])
+    ax.bar_label(barContnr, label_type="center", labels=produtos_sorted.index, color="lightgray")
+    ax.grid()
+    ax.set_axisbelow(True)
+
+
+    # ax.tick_params(axis="x", labelsize="smaller")
+    # ax.tick_params(axis='x', bottom=False, labelbottom=False)
+
+    ax.tick_params(axis='y', left=False, labelleft=False)
+
+    ax.legend()
+
+
+ax42.set_title("Produtos mais e menos\nvendido de cada loja")
+
+# fig4.tight_layout()
+fig4.show()
+# fig1.savefig('Gráfico-4.png')
 
 
 # ## Relatório
 
+# ### Métricas
 # 
+# Levando em conta que o Senhor João precisa vender uma das 4 lojas da Alura Store para iniciar um novo empreendimento, essa análise se baseia em identificar a loja que irá ter o menor impacto nas vendas, faturamento e avaliação dos clientes.
+
+# ### Análise
+# 
+# Vemos pelo [Gráfico 1](#scrollTo=Gr_fico_1) que as categorias que mais contribuem para o faturamento total são: **eletrônicos**, **eletrodomésticos** e **móveis**; que somados compõem $85\%$ do faturamento. Dentre essas categorias, a **Loja 4** possui a menor contribuição para o faturamento, estando em último lugar em eletrônicos e eletrodomésticos e em segundo lugar em móveis, contribuindo com $24.66/%$, $21.38\%$ e $25.41\%$ respectivamente. **Loja 2** também fica em último lugar em uma categoria (móveis), com $23.29\%$, mas fica em segundo lugar nas outras duas.
+# 
+# Considerando a quantidade de vendas por categoria, vista no [Gráfico 2](#scrollTo=Gr_fico_2); **Loja 1** teve menos produtos vendidos nas categorias _utilidades domésticas_ e _livros_, as duas categorias com menor impacto no faturamento; **Loja 2** tem menos produtos vendidos nas categorias _eletrônicos_, _móveis_, _esporte e lazer_ e _brinquedos_; **Loja 3** não fica em último em nenhuma das 8 categorias; e **Loja 4** teve menos produtos vendidos nas categorias _eletrodomésticos_ e _instrumentos musicais_. Neste quesito, Lojas 2 e 4 ficam nas piores posições novamente.
+# 
+# Olhando para avaliações dos clientes de cada loja, no [Gráfico 3](#scrollTo=Gr_fico_3), todas as lojas têm médias muito próximas, com variações pequenas; mas dentre elas, as Lojas 2 e 3 ficam na frente: Loja 3 com maior quantidade de notas 5, seguida da Loja 2; e Loja 2 com menor quantidade de notas 1, seguida da Loja 3. Por outro lado, **Loja 1** possui tanto a maior quantidade de notas 1 quanto a menor quantidade de notas 5, seguida da **Loja 4**.
+# 
+# No [Gráfico 4](#scrollTo=Gr_fico_4), vemos que os 4 produtos mais vendidos pelas Lojas 1 não só têm em média preço mais alto que outros produtos, como também estão entre os produtos mais vendidos no geral, o que indica um alto impacto da Loja 1. Já alguns dos produtos mais vendidos pela **Loja 4** (como _Faqueiro_ e _Dashboards com Power BI_) têm valor relativamente baixo e não estão entre os mais vendidos no geral.
+
+# ### Conclusão
+# 
+# Levando todos esses pontos em consideração, é certo afirmar que a Loja 1, apesar de uma média um pouco mais abaixo que as outras na avaliação dos clientes, possui um alto impacto no geral no faturamento e no número de vendas dos produtos e categorias de produtos mais relevantes. Lojas 2 e 3 ficam mais próximas da média na maioria dessas métricas, com a Loja 2 um pouco mais atrás. Isso deixa a **Loja 4** como a indicada para a venda, de forma a gerar o menor impacto no empreendimento do Seu João.
