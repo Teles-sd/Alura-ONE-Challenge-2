@@ -489,3 +489,295 @@ fig4.show()
 # ### Conclusão
 # 
 # Levando todos esses pontos em consideração, é certo afirmar que a Loja 1, apesar de uma média um pouco mais abaixo que as outras na avaliação dos clientes, possui um alto impacto no geral no faturamento e no número de vendas dos produtos e categorias de produtos mais relevantes. Lojas 2 e 3 ficam mais próximas da média na maioria dessas métricas, com a Loja 2 um pouco mais atrás. Isso deixa a **Loja 4** como a indicada para a venda, de forma a gerar o menor impacto no empreendimento do Seu João.
+
+# ## Extra
+
+# ### Análise de Desempenho Geográfico
+
+# #### Folium
+# 
+# [Folium - Getting started](https://python-visualization.github.io/folium/latest/getting_started.html)
+# 
+# [Folium - Using `GeoJson`](https://python-visualization.github.io/folium/latest/user_guide/geojson/geojson.html)
+# 
+# [Folium - Using `Choropleth`](https://python-visualization.github.io/folium/latest/user_guide/geojson/choropleth.html)
+# 
+# [Folium - API reference](https://python-visualization.github.io/folium/latest/reference.html)
+# 
+# <!-- [Folium - Getting started]() -->
+
+# In[30]:
+
+
+import folium
+from branca.colormap import linear
+
+
+# #### geoBoundaries
+# 
+# Os arquivos [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) necessários para uso do **Folium** foram adquiridos do banco de dados **geoBoundaries**:
+# 
+# > - [geoBoundaries](https://www.geoboundaries.org): An open database of political administrative boundaries.
+# > - [geoBoundaries - Github](https://github.com/wmgeolab/geoBoundaries)
+
+# A [geoboundaries API](https://www.geoboundaries.org/api.html) determina que qualquer informação pode ser requisitada no endereço:
+# 
+# ```text
+# https://www.geoboundaries.org/api/current/[RELEASE-TYPE]/[3-LETTER-ISO-CODE]/[BOUNDARY-TYPE]/
+# ```
+# 
+# Onde:
+# 
+# - `[RELEASE-TYPE]`: para a maioria dos usuários, é sugerido usar `gbOpen`
+# - `[3-LETTER-ISO-CODE]`: código ISO-3166-1 (Alpha 3) do país, por exemplo:
+#     - `USA`, United States
+#     - `GBR`, United Kingdom
+#     - `CHN`, China
+#     - `BRA`, Brazil, etc.
+#     - O código especial `ALL` também é aceito.
+# - `[ADM-LEVEL]`: tipo de fronteira, isto é, nível administrativo:
+#     - `ADM0`, país
+#     - `ADM1`, primeiro nível de fronteiras subnacionais (regiões, no Brasil; _states_, no EUA)
+#     - `ADM2`, primeiro nível de fronteiras subnacionais (estados, no Brasil; _county_, no EUA)
+#     - `ADM3`, ...
+#     - `ADM4`, ...
+#     - `ALL`
+# 
+# Se em dúvida de quais dados usar, é possível compara dados em [geoboundaries - Visualize Data: Visualize & Compare Boundaries](https://www.geoboundaries.org/visualize.html).
+# 
+# Para os estados do Brasil, se usa o endereço "https://www.geoboundaries.org/api/current/gbOpen/BRA/ADM1/" e um JSON é retornado, onde o endereço para o GeoJSON está disponível nos campos `gjDownloadURL` ou `simplifiedGeometryGeoJSON`.
+# 
+# <!-- https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/BRA/ADM1/geoBoundaries-BRA-ADM1.geojson -->
+
+# In[31]:
+
+
+import requests
+import geopandas
+
+
+# In[32]:
+
+
+br_states_gb_json = requests.get( "https://www.geoboundaries.org/api/current/gbOpen/BRA/ADM1/" ).json()
+br_states_gb_json["gjDownloadURL"]
+
+
+# In[33]:
+
+
+br_states = geopandas.read_file(br_states_gb_json["gjDownloadURL"])
+br_states = br_states.rename(columns={"shapeISO":"id", "shapeName":"estado"})[["id","estado","geometry"]]
+br_states['id'] = br_states['id'].map(lambda s: s[3:])
+br_states.set_index('id', inplace=True)
+
+br_states.head(10)
+
+
+# #### Dados das lojas
+
+# ##### Compra por estado
+
+# In[34]:
+
+
+compra_pEstado = pd.concat([ loja[['Produto','Local da compra']].groupby("Local da compra").count().rename(columns={'Produto':loja_s}) for loja,loja_s in zip(lojas,lojas_str) ], axis=1).fillna(0).astype(int)
+compra_pEstado["Total"] = compra_pEstado.sum(axis=1)
+# compra_pEstado.index.name = "id"
+compra_pEstado["Estado"] = compra_pEstado.index
+compra_pEstado = compra_pEstado[['Estado', 'Loja 1', 'Loja 2', 'Loja 3', 'Loja 4', 'Total']]
+compra_pEstado.sort_values(by='Total').iloc[np.r_[0:5,-5:0]]
+# compra_pEstado
+
+
+# ##### Faturamento total, Frete médio e número de Produtos comprados por Localização (lat, lon) por loja
+
+# In[35]:
+
+
+# loja1['lat_lon'] = list(zip(loja1['lat'], loja1['lon']))
+# loja1[['Produto', 'Categoria do Produto', 'Preço', 'Frete', 'Local da compra', 'lat', 'lon', 'lat_lon']].head()
+
+
+# In[36]:
+
+
+loja1.groupby(['lat', 'lon']).agg({"Local da compra":"nunique"})["Local da compra"].nunique()
+
+
+# In[37]:
+
+
+# data_pLoc_pLoja = { loja_s:loja.groupby(['lat', 'lon']).agg({
+data_pLoc_pLoja = { loja_s:loja.groupby(['lon', 'lat']).agg({
+    "Preço":"sum",
+    "Frete":"mean",
+    "Produto": "count",
+    "Local da compra":"first"
+}).rename(columns={
+    "Preço":"Faturamento total",
+    "Frete":"Frete médio",
+    "Produto": "Produtos comprados",
+    "Local da compra":"Estado",
+}) for loja,loja_s in zip(lojas,lojas_str) }
+
+for loja in data_pLoc_pLoja.values():
+    # loja["geometry"] = loja.index
+    loja["geometry"] = geopandas.points_from_xy( *zip(*loja.index) )
+    loja.reset_index(inplace=True, drop=True)
+
+data_pLoc_pLoja = { loja_s:geopandas.GeoDataFrame(loja).set_crs(br_states.crs) for loja_s,loja in data_pLoc_pLoja.items() }
+
+data_pLoc_pLoja["Loja 1"].head()
+
+
+# In[38]:
+
+
+# Problems indexing and with NaN
+pd.concat( [ loja.groupby(['lon', 'lat']).agg({
+    "Preço":"sum",
+    "Frete":"mean",
+    "Produto": "count",
+    "Local da compra":"first"
+}).rename(columns={
+    "Preço":"Faturamento total",
+    "Frete":"Frete médio",
+    "Produto": "Produtos comprados",
+    "Local da compra":"Estado",
+}) for loja in lojas ], axis=1, keys=lojas_str ).head()
+
+
+# #### Mapa
+# 
+# Utilize os dados de **latitude** (`lat`) e **longitude** (`lon`) para mapear as vendas de cada loja e analisar a distribuição geográfica dos produtos vendidos.
+
+# In[39]:
+
+
+br_states.head()
+
+
+# In[40]:
+
+
+br_states.to_json()[:300]
+
+
+# {'id': '0', 'type': 'Feature', 'properties': {'estado': 'Roraima'}, 'geometry': {'type': 'Polygon', 'coordinates': [[[-60.018789227999946, 0.249984785000038], ...
+
+# {'id': 'RR', 'type': 'Feature', 'properties': {'id': 'RR', 'estado': 'Roraima'}, 'geometry': {'type': 'Polygon', 'coordinates': [[[-60.018789227999946, 0.249984785000038], ...
+
+# In[41]:
+
+
+compra_pEstado.head()
+
+
+# In[42]:
+
+
+data_pLoc_pLoja["Loja 1"].head()
+
+
+# In[43]:
+
+
+m = folium.Map(
+    location=[-22.19, -48.79],
+    width="70%", height="70%",
+
+    zoom_start=4,
+    min_zoom=4, max_zoom=7,
+
+    min_lat=10, max_lat=-37,
+    min_lon=-85, max_lon=-25,
+    max_bounds=True,
+
+    control=False,
+)
+
+fcp = folium.Choropleth(
+    geo_data=br_states,
+    key_on="feature.id",
+
+    name="Total de compras por Estado",
+    show=True,
+    # show=False,
+
+    legend_name="Número de compras",
+    bins=8,
+
+    data=compra_pEstado,
+    # If the data is a Pandas DataFrame, the columns of data to be bound. Must pass column 1 as the key, and column 2 the values.
+    columns=['Estado', 'Total'],
+
+    # fill_color="YlGn",
+    fill_opacity=0.7,
+    line_weight=2,
+    line_opacity=0.5,
+
+    highlight=True,
+
+    # nan_fill_color="black",
+    nan_fill_color="purple",
+    nan_fill_opacity=0.5,
+
+).add_to(m)
+
+# looping thru the geojson object and adding a new property(Total)
+# and assigning a value from our dataframe
+for s in fcp.geojson.data['features']:
+    s['properties']['Total'] = int(compra_pEstado['Total'].loc[s['id']])
+
+# and finally adding a tooltip/hover to the choropleth's geojson
+# folium.GeoJsonTooltip(fields=["Total"], aliases=["Total de compras no estado: "]).add_to(fcp.geojson)
+folium.GeoJsonTooltip(fields=["Total"], aliases=["Total de compras no estado: "]).add_to(fcp.geojson)
+
+for loja_s in lojas_str:
+    folium.GeoJson(
+        data=data_pLoc_pLoja[loja_s],
+
+        name=loja_s,
+        show=False,
+
+        # When hovering
+        # tooltip=folium.GeoJsonTooltip(fields=["Estado", "Produtos comprados"]),
+        tooltip=folium.GeoJsonTooltip(
+            fields=["Produtos comprados"],
+            aliases=[f"Produtos comprados na {loja_s}: "]
+        ),
+        # When clicking
+        popup=folium.GeoJsonPopup(
+            fields=["Produtos comprados", "Faturamento total","Frete médio"],
+            aliases=[f"Produtos comprados na {loja_s}: ", "Faturamento: ","Frete médio: "]
+        ),
+
+        marker=folium.Circle(
+            # radius=400000,
+            fill_color="orange",
+            fill_opacity=0.4,
+            color="black",
+            weight=2
+        ),
+        style_function=lambda feature: {
+            "fillColor": "orange", #colors[x['properties']['service_level']],
+            # "radius": 4000 * feature['properties']['Produtos comprados'],
+            "radius": 4000 * np.interp ( feature['properties']['Produtos comprados'], (compra_pEstado['Total'].min(), compra_pEstado['Total'].max()), (5, 100) ),
+        },
+
+        highlight_function=lambda feature: {
+            "fillOpacity": 0.8
+        },
+
+        zoom_on_click=False,
+
+    ).add_to(m)
+
+folium.LayerControl(collapsed=False).add_to(m)
+# folium.LayerControl().add_to(m)
+
+m
+
+
+# # Bottom text

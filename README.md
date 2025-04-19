@@ -29,6 +29,10 @@ Para isso, você analisará dados de vendas, desempenho e avaliações das 4 loj
     - [x] Decidir quais tipos de gráficos usar para apresentar os resultados de maneira clara e visual.
     - [x] **Mínimo de 3 gráficos diferentes**, que podem incluir gráficos de barras, pizza, dispersão, entre outros.
 - [x] Apresentar uma recomendação: Após as análises, escreva um texto explicando qual loja o Senhor João **deve vender** e por quê, com base nos dados apresentados.
+- [ ] Extra:
+    - [x] Utilize os dados de **latitude** (`lat`) e **longitude** (`lon`) para mapear as vendas de cada loja e analisar a distribuição geográfica dos produtos vendidos.
+    - [ ] Gere **gráficos de dispersão** ou **mapas de calor (Heatmaps)** para visualizar os dados e identificar áreas com maior concentração de vendas.
+    - [x] Explore se algumas lojas têm um desempenho superior ou inferior em determinadas regiões, e identifique se existem padrões geográficos que possam influenciar o desempenho das lojas.
 
 ---
 
@@ -44,6 +48,12 @@ Código da análise e visualização de dados em Python: [Notebook](./AluraStore
 | ~ | ~ | ~ |
 | <img src="./images/Gráfico-3.png" alt="Gráfico 3"/> | | <img src="./images/Gráfico-4.png" alt="Gráfico 4"/> |
 | [Gráfico 3](./images/Gráfico-3.png) | | [Gráfico 4](./images/Gráfico-4.png) |
+
+### Mapa
+
+| <img src="./images/Mapa.gif" alt="Mapa"/> |
+| :---: |
+| [Mapa](./images/Mapa.gif) |
 
 ### Dados
 
@@ -127,7 +137,7 @@ Loja 4   Média: R$ 31.28   Desvio Padrão: 40.37
 
 Levando em conta que o Senhor João precisa vender uma das 4 lojas da Alura Store para iniciar um novo empreendimento, essa análise se baseia em identificar a loja que irá ter o menor impacto nas vendas, faturamento e avaliação dos clientes.
 
-Vemos pelo Gráfico 1 que as categorias que mais contribuem para o faturamento total são: **eletrônicos**, **eletrodomésticos** e **móveis**; que somados compõem $85\%$ do faturamento. Dentre essas categorias, a **Loja 4** possui a menor contribuição para o faturamento, estando em último lugar em eletrônicos e eletrodomésticos e em segundo lugar em móveis, contribuindo com $24.66/%$, $21.38\%$ e $25.41\%$ respectivamente. **Loja 2** também fica em último lugar em uma categoria (móveis), com $23.29\%$, mas fica em segundo lugar nas outras duas.
+Vemos pelo Gráfico 1 que as categorias que mais contribuem para o faturamento total são: **eletrônicos**, **eletrodomésticos** e **móveis**; que somados compõem 85% do faturamento. Dentre essas categorias, a **Loja 4** possui a menor contribuição para o faturamento, estando em último lugar em eletrônicos e eletrodomésticos e em segundo lugar em móveis, contribuindo com 24.66%, 21.38% e 25.41% respectivamente. **Loja 2** também fica em último lugar em uma categoria (móveis), com 23.29%, mas fica em segundo lugar nas outras duas.
 
 Considerando a quantidade de vendas por categoria, vista no Gráfico 2; **Loja 1** teve menos produtos vendidos nas categorias _utilidades domésticas_ e _livros_, as duas categorias com menor impacto no faturamento; **Loja 2** tem menos produtos vendidos nas categorias _eletrônicos_, _móveis_, _esporte e lazer_ e _brinquedos_; **Loja 3** não fica em último em nenhuma das 8 categorias; e **Loja 4** teve menos produtos vendidos nas categorias _eletrodomésticos_ e _instrumentos musicais_. Neste quesito, Lojas 2 e 4 ficam nas piores posições novamente.
 
@@ -157,7 +167,13 @@ Levando todos esses pontos em consideração, é certo afirmar que a Loja 1, ape
     - Numpy
     - Pandas
     - Matplotlib
+    - Folium
+    - Geopandas
+- Arquivos [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) necessários para uso do Folium foram adquiridos do banco de dados **geoBoundaries**:
+  - [geoBoundaries](https://www.geoboundaries.org): _An open database of political administrative boundaries_.
 - Ambiente:
   - [Google Colaboratory][colab]
+- Gif feito com:
+  - [Ezgif](https://ezgif.com)
 
 ---

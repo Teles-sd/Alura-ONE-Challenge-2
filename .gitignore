@@ -4,6 +4,7 @@
 # Files
 
 .commit-msg-drafts.md
+*.geojson
 
 # Directories
 
